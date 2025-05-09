@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.expert.client.WeatherClient;
 import org.example.expert.config.CustomUserDetails;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
+import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
@@ -25,7 +27,8 @@ public class TodoService {
     private final WeatherClient weatherClient;
 
     @Transactional
-    public TodoSaveResponse saveTodo(CustomUserDetails userDetails, TodoSaveRequest todoSaveRequest) {
+    public TodoSaveResponse saveTodo(CustomUserDetails userDetails,
+        TodoSaveRequest todoSaveRequest) {
         User user = User.fromAuthUser(userDetails);
 
         String weather = weatherClient.getTodayWeather();
@@ -60,7 +63,8 @@ public class TodoService {
         todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
 
         if (weather.isBlank() && !startDate.isBlank()) {
-            todos = todoRepository.findAllByDateRange(toLocalDateTime(startDate), toLocalDateTime(endDate), pageable);
+            todos = todoRepository.findAllByDateRange(toLocalDateTime(startDate),
+                toLocalDateTime(endDate), pageable);
         }
 
         if (!weather.isBlank() && startDate.isBlank()) {
@@ -68,7 +72,8 @@ public class TodoService {
         }
 
         if (!weather.isBlank() && !startDate.isBlank()) {
-            todos = todoRepository.findAllByWeatherAndDateRange(weather, toLocalDateTime(startDate), toLocalDateTime(endDate), pageable);
+            todos = todoRepository.findAllByWeatherAndDateRange(weather, toLocalDateTime(startDate),
+                toLocalDateTime(endDate), pageable);
         }
 
         return todos.map(todo -> new TodoResponse(
@@ -100,7 +105,11 @@ public class TodoService {
         );
     }
 
-    private static LocalDateTime toLocalDateTime(String time){
+    private static LocalDateTime toLocalDateTime(String time) {
         return LocalDateTime.parse(time + "T23:59:59");
+    }
+
+    public Page<TodoSearchResponse> getTodosSearch(TodoSearchRequest dto, Pageable pageable) {
+        return todoRepository.findByTitleAndManagerAndRange(dto, pageable);
     }
 }
