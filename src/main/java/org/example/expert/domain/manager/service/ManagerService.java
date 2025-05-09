@@ -1,6 +1,8 @@
 package org.example.expert.domain.manager.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.config.CustomUserDetails;
@@ -9,6 +11,8 @@ import org.example.expert.domain.manager.dto.request.ManagerSaveRequest;
 import org.example.expert.domain.manager.dto.response.ManagerResponse;
 import org.example.expert.domain.manager.dto.response.ManagerSaveResponse;
 import org.example.expert.domain.manager.entity.Manager;
+import org.example.expert.domain.manager.entity.ManagerLog;
+import org.example.expert.domain.manager.repository.ManagerLogRepository;
 import org.example.expert.domain.manager.repository.ManagerRepository;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
@@ -25,11 +29,17 @@ import org.springframework.util.ObjectUtils;
 public class ManagerService {
 
     private final ManagerRepository managerRepository;
+    private final ManagerLogRepository managerLogRepository;
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
 
     @Transactional
     public ManagerSaveResponse saveManager(CustomUserDetails userDetails, long todoId, ManagerSaveRequest managerSaveRequest) {
+
+        String log = "요청 유저: " +  userDetails.getUsername() + ", 요청 todo: " + todoId + ", 배치할 유저: " + managerSaveRequest.getManagerUserId() + ", 요청 시간: " + LocalDateTime.now();
+
+        managerLogRepository.save(new ManagerLog(log));
+
         // 일정을 만든 유저
         User user = User.fromAuthUser(userDetails);
         Todo todo = todoRepository.findById(todoId)
