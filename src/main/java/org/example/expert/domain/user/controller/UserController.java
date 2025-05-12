@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,5 +28,10 @@ public class UserController {
     @PutMapping("/users")
     public void changePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
         userService.changePassword(Long.parseLong(userDetails.getUsername()), userChangePasswordRequest);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<UserResponse> getUserbyNickname(@RequestParam(name = "nickname") String nickname){
+        return ResponseEntity.ok(userService.getUserByNickname(nickname));
     }
 }
